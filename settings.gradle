@@ -1,0 +1,5 @@
+rootProject.name = 'projectchain'
+include 'projectchain'
+findProject(':projectchain')?.name = 'projectchain'
+rootProject.name = 'projectchain'
+
