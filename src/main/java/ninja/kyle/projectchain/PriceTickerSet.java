@@ -3,6 +3,8 @@ package ninja.kyle.projectchain;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import java.util.Optional;
+
 import ninja.kyle.projectchain.internallib.Pair;
 
 public class PriceTickerSet {
@@ -24,14 +26,12 @@ public class PriceTickerSet {
     return tradingPairs;
   }
 
-  public final double getLastPrice(Pair<Asset, Asset> tradingPair) {
-    return 0;
+  public final Optional<Double> getLastPrice(Pair<Asset, Asset> tradingPair) {
+    return priceHistoryMap.get(tradingPair).getLastPrice();
   }
 
   final void addPairPrice(Pair<Asset, Asset> tradingPair, double price) {
-    priceHistoryMap.get(tradingPair);
+    priceHistoryMap.get(tradingPair).addPrice(price);
   }
-
-  //TODO: Trading functionality
 
 }
