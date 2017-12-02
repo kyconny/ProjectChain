@@ -1,17 +1,19 @@
 package ninja.kyle.projectchain;
 
+import java.math.BigDecimal;
+
 public class PricePoint {
-  private final double price;
+  private final BigDecimal price;
   private final int delta;
   private final long time;
 
-  public PricePoint(double price, int delta, long time) {
+  public PricePoint(BigDecimal price, int delta, long time) {
     this.price = price;
     this.delta = delta;
     this.time = time;
   }
 
-  public double getPrice() {
+  public BigDecimal getPrice() {
     return price;
   }
 

@@ -1,8 +1,8 @@
 package ninja.kyle.projectchain;
 
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,17 +16,17 @@ public class PriceMultimapBuilder {
 
   private final List<Consumer<ImmutableMultimap<Pair<Asset, Asset>, PricePoint>>> observerList = new LinkedList<>();
 
-  private Map<Pair<Asset, Asset>, PriceHistoryBuilder> priceHistoryMap = new HashMap<>();
+  private final Map<Pair<Asset, Asset>, PriceHistoryBuilder> priceHistoryMap = new HashMap<>();
 
   public PriceMultimapBuilder(Set<Pair<Asset, Asset>> tradingPairs) {
-    clearMap(tradingPairs);
+    tradingPairs.forEach(p -> priceHistoryMap.put(p, new PriceHistoryBuilder()));
   }
 
   public void addObserver(Consumer<ImmutableMultimap<Pair<Asset, Asset>, PricePoint>> observer) {
     observerList.add(observer);
   }
 
-  public void addPairPrice(Pair<Asset, Asset> tradingPair, double price) {
+  public void addPairPrice(Pair<Asset, Asset> tradingPair, BigDecimal price) {
     PriceHistoryBuilder builder = priceHistoryMap.get(tradingPair);
 
     if (builder == null) {
@@ -43,7 +43,14 @@ public class PriceMultimapBuilder {
   }
 
   private void clearMap(Set<Pair<Asset, Asset>> tradingPairs) {
-    tradingPairs.forEach(p -> priceHistoryMap.put(p, new PriceHistoryBuilder()));
+    for (Pair<Asset, Asset> p : tradingPairs) {
+      List<PricePoint> history = priceHistoryMap.get(p).getPriceHistory();
+      if (!history.isEmpty()) {
+        priceHistoryMap.put(p, new PriceHistoryBuilder(history.get(0).getTime()));
+      } else {
+        priceHistoryMap.put(p, new PriceHistoryBuilder());
+      }
+    }
   }
 
   private ImmutableMultimap<Pair<Asset, Asset>, PricePoint> getPriceMultimap() {
