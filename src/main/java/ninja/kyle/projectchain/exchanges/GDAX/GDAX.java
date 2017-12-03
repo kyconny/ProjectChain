@@ -15,6 +15,7 @@ import java.time.ZonedDateTime;
 import java.util.function.Consumer;
 
 import ninja.kyle.projectchain.Asset;
+import ninja.kyle.projectchain.ExchangeBook;
 import ninja.kyle.projectchain.PriceMultimapBuilder;
 import ninja.kyle.projectchain.PricePoint;
 import ninja.kyle.projectchain.internallib.Pair;
@@ -27,8 +28,9 @@ public class GDAX {
   private final GDAXWSMessageHandler gdaxwsMessageHandler;
 
   private final WebSocket webSocket;
-  private final ImmutableSet<Pair<Asset, Asset>> monitoredMarkets;
   private final PriceMultimapBuilder priceMultimapBuilder;
+
+  private final ExchangeBook exchangeBook;
 
   private GDAX() throws IOException, WebSocketException {
     gdaxJson = new GDAXJson();
@@ -41,16 +43,14 @@ public class GDAX {
             .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
             .connect();
 
-    monitoredMarkets = ImmutableSet.<Pair<Asset,Asset>>builder()
+    ImmutableSet<Pair<Asset, Asset>> monitoredMarkets = ImmutableSet.<Pair<Asset,Asset>>builder()
             .add(new Pair<>(Asset.BTC, Asset.USD))
             .build();
 
     priceMultimapBuilder = new PriceMultimapBuilder(monitoredMarkets);
 
-    subscribeToChannels();
-  }
+    exchangeBook = new ExchangeBook(monitoredMarkets);
 
-  private void subscribeToChannels() {
     String subMsg = gdaxJson.genSubscribeMarketJSON(monitoredMarkets);
     webSocket.sendText(subMsg);
   }
