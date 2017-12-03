@@ -54,7 +54,7 @@ public class GDAX {
     String subMsg = gdaxJson.genSubscribeMarketJSON(monitoredMarkets);
     webSocket.sendText(subMsg);
   }
-  
+
   private class GDAXWSAdapter extends WebSocketAdapter {
 
     public void onTextMessage(WebSocket webSocket, String message) {

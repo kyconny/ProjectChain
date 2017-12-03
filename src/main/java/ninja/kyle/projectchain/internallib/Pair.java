@@ -1,5 +1,6 @@
 package ninja.kyle.projectchain.internallib;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class Pair<S, T> {
@@ -10,6 +11,11 @@ public class Pair<S, T> {
   public Pair(S left, T right) {
     this.left = left;
     this.right = right;
+  }
+
+  public Pair(Map.Entry<S, T> entry) {
+    this.left = entry.getKey();
+    this.right = entry.getValue();
   }
 
   public S getLeft() {

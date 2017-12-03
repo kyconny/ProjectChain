@@ -31,12 +31,6 @@ public class GDAXJson {
   public String genSubscribeMarketJSON(Set<Pair<Asset, Asset>> monitoredMarkets) {
     JsonObject subJson = Json.object();
     subJson.add("type", "subscribe");
-    subJson.add("product_ids", Json.array());
-
-    JsonArray channels = Json.array().asArray();
-
-    JsonObject channel = Json.object();
-    channel.add("name", "ticker");
 
     JsonArray marketPairs = Json.array().asArray();
 
@@ -44,11 +38,21 @@ public class GDAXJson {
       marketPairs.add(p.getLeft() + "-" + p.getRight());
     }
 
+    subJson.add("product_ids", marketPairs);
+
+    JsonArray channels = Json.array().asArray();
+
+    channels.add("level2");
+
+    JsonObject channel = Json.object();
+    channel.add("name", "ticker");
+
     channel.add("product_ids", marketPairs);
 
     channels.add(channel);
 
     subJson.add("channels", channels);
+
     return subJson.toString();
   }
 
