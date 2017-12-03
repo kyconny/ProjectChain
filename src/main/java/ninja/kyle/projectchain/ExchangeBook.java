@@ -10,18 +10,25 @@ import ninja.kyle.projectchain.internallib.Pair;
 public class ExchangeBook {
 
   private final ImmutableMap<Pair<Asset, Asset>, AssetBook> marketBooks;
+  private final int limit;
 
   public ExchangeBook(Set<Pair<Asset, Asset>> tradingPairs) {
-    ImmutableMap.Builder<Pair<Asset, Asset>, AssetBook> builder = ImmutableMap.builder();
-    tradingPairs.forEach(p -> builder.put(p, new AssetBook()));
-    this.marketBooks = builder.build();
+    this(tradingPairs, 0);
   }
 
-  public Pair<BigDecimal, Integer> getMostReasonable(Pair<Asset, Asset> tradingPair, AssetBook.OrderType type) {
+  public ExchangeBook(Set<Pair<Asset, Asset>> tradingPairs, int limit) {
+    ImmutableMap.Builder<Pair<Asset, Asset>, AssetBook> builder = ImmutableMap.builder();
+    tradingPairs.forEach(p -> builder.put(p, new AssetBook(limit)));
+    this.marketBooks = builder.build();
+
+    this.limit = limit;
+  }
+
+  public Pair<BigDecimal, BigDecimal> getMostReasonable(Pair<Asset, Asset> tradingPair, AssetBook.OrderType type) {
     return getAssetBook(tradingPair).getMostReasonable(type);
   }
 
-  public void putNumberOfOrders(Pair<Asset, Asset> tradingPair, AssetBook.OrderType type, BigDecimal price, Integer number) {
+  public void putNumberOfOrders(Pair<Asset, Asset> tradingPair, AssetBook.OrderType type, BigDecimal price, BigDecimal number) {
     getAssetBook(tradingPair).putNumberOfOrders(type, price, number);
   }
 

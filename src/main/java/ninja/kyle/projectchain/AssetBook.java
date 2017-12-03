@@ -9,31 +9,45 @@ import java.util.function.Function;
 import ninja.kyle.projectchain.internallib.Pair;
 
 public class AssetBook {
-  private ConcurrentNavigableMap<BigDecimal, Integer> bids = new ConcurrentSkipListMap<>(Comparator.reverseOrder());
-  private ConcurrentNavigableMap<BigDecimal, Integer> asks = new ConcurrentSkipListMap<>();
+  private final int limit;
 
-  public Pair<BigDecimal, Integer> getMostReasonable(OrderType type) {
+  private ConcurrentNavigableMap<BigDecimal, BigDecimal> bids = new ConcurrentSkipListMap<>(Comparator.reverseOrder());
+  private ConcurrentNavigableMap<BigDecimal, BigDecimal> asks = new ConcurrentSkipListMap<>();
+
+  public AssetBook(int limit) {
+    this.limit = limit;
+  }
+
+  public AssetBook() {
+    this(0);
+  }
+
+  public Pair<BigDecimal, BigDecimal> getMostReasonable(OrderType type) {
     return new Pair<>(type.getBook.apply(this).firstEntry());
   }
 
-  public void putNumberOfOrders(OrderType type, BigDecimal price, Integer number) {
-    ConcurrentNavigableMap<BigDecimal, Integer> book = type.getBook.apply(this);
+  public void putNumberOfOrders(OrderType type, BigDecimal price, BigDecimal number) {
+    ConcurrentNavigableMap<BigDecimal, BigDecimal> book = type.getBook.apply(this);
 
-    if (number == 0) {
+    if (number.equals(0)) {
       book.remove(price);
       return;
     }
 
     book.put(price, number);
+
+    if (limit != 0 && book.size() > limit) {
+      book.pollLastEntry();
+    }
   }
 
   public enum OrderType {
     BID(b -> b.bids), ASK(b -> b.asks);
 
-    OrderType(Function<AssetBook, ConcurrentNavigableMap<BigDecimal, Integer>> getBook) {
+    OrderType(Function<AssetBook, ConcurrentNavigableMap<BigDecimal, BigDecimal>> getBook) {
       this.getBook = getBook;
     }
 
-    private final Function<AssetBook, ConcurrentNavigableMap<BigDecimal, Integer>> getBook;
+    private final Function<AssetBook, ConcurrentNavigableMap<BigDecimal, BigDecimal>> getBook;
   }
 }

@@ -5,9 +5,13 @@ import com.google.common.collect.ImmutableMap;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -25,6 +29,7 @@ public class GDAXJson {
     return ImmutableMap.
             <String, BiConsumer<JsonObject, GDAX.GDAXWSMessageHandler>>builder()
             .put("ticker", GDAXJson::handleTicker)
+            .put("snapshot", GDAXJson::handleSnapshot)
             .build();
   }
 
@@ -56,6 +61,11 @@ public class GDAXJson {
     return subJson.toString();
   }
 
+  private static Pair<Asset, Asset> tradingPairFromProductID(JsonObject object) {
+    String[] parts = object.get("product_id").asString().split("-");
+    return new Pair<>(Asset.valueOf(parts[0]), Asset.valueOf(parts[1]));
+  }
+
   public void handleWSMessage(String message, GDAX.GDAXWSMessageHandler messageHandler) {
     JsonObject messageObj = Json.parse(message).asObject();
     String type = messageObj.get("type").asString();
@@ -70,13 +80,29 @@ public class GDAXJson {
   }
 
   private static void handleTicker(JsonObject object, GDAX.GDAXWSMessageHandler handler) {
-    String product = object.get("product_id").asString();
-    String[] parts = product.split("-");
-    Pair<Asset, Asset> tradingPair = new Pair<>(Asset.valueOf(parts[0]), Asset.valueOf(parts[1]));
     String priceStr = object.get("price").asString();
     BigDecimal price = new BigDecimal(priceStr);
     String timeString = object.get("time").asString();
-    handler.handleTicker(tradingPair, price, ZonedDateTime.parse(timeString));
+    handler.handleTicker(tradingPairFromProductID(object), price, ZonedDateTime.parse(timeString));
+  }
+
+  private static void handleSnapshot(JsonObject object, GDAX.GDAXWSMessageHandler handler) {
+    handler.handleL2Data(tradingPairFromProductID(object),
+            getTradeInfoFromSnapshot(object, "bids"),
+            getTradeInfoFromSnapshot(object, "asks"));
+  }
+
+  private static Pair<BigDecimal, BigDecimal>[] getTradeInfoFromSnapshot(JsonObject object, String side) {
+    List<Pair<BigDecimal, BigDecimal>> workerList = new LinkedList<>();
+
+    for (JsonValue info : object.get(side).asArray()) {
+      JsonArray array = info.asArray();
+      String left = array.get(0).asString();
+      String right = array.get(1).asString();
+      workerList.add(new Pair<>(new BigDecimal(left), new BigDecimal(right)));
+    }
+
+    return workerList.toArray((Pair<BigDecimal, BigDecimal>[])new Pair[workerList.size()]);
   }
 
 }

@@ -15,6 +15,7 @@ import java.time.ZonedDateTime;
 import java.util.function.Consumer;
 
 import ninja.kyle.projectchain.Asset;
+import ninja.kyle.projectchain.AssetBook;
 import ninja.kyle.projectchain.ExchangeBook;
 import ninja.kyle.projectchain.PriceMultimapBuilder;
 import ninja.kyle.projectchain.PricePoint;
@@ -49,7 +50,7 @@ public class GDAX {
 
     priceMultimapBuilder = new PriceMultimapBuilder(monitoredMarkets);
 
-    exchangeBook = new ExchangeBook(monitoredMarkets);
+    exchangeBook = new ExchangeBook(monitoredMarkets, 20);
 
     String subMsg = gdaxJson.genSubscribeMarketJSON(monitoredMarkets);
     webSocket.sendText(subMsg);
@@ -66,6 +67,16 @@ public class GDAX {
   public class GDAXWSMessageHandler {
       public void handleTicker(Pair<Asset, Asset> tradingPair, BigDecimal price, ZonedDateTime time) {
         priceMultimapBuilder.addPairPrice(tradingPair, price, time);
+      }
+
+      public void handleL2Data(Pair<Asset, Asset> tradingPair, Pair<BigDecimal, BigDecimal>[] bids, Pair<BigDecimal, BigDecimal>[] asks) {
+        for (Pair<BigDecimal, BigDecimal> b : bids) {
+          exchangeBook.putNumberOfOrders(tradingPair, AssetBook.OrderType.BID, b.getLeft(), b.getRight());
+        }
+
+        for (Pair<BigDecimal, BigDecimal> a : asks) {
+          exchangeBook.putNumberOfOrders(tradingPair, AssetBook.OrderType.ASK, a.getLeft(), a.getRight());
+        }
       }
   }
 
