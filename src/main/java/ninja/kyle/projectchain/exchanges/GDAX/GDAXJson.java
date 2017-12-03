@@ -9,7 +9,6 @@ import com.eclipsesource.json.JsonValue;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;

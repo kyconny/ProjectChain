@@ -29,6 +29,7 @@ public class PriceTickerMain {
         e.printStackTrace();
       }
       gdax.flushPriceData();
+      System.out.println("Spread: " + gdax.getSpread(new Pair<>(Asset.BTC, Asset.USD)));
     }
   }
 

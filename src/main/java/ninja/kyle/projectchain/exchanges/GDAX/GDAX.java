@@ -101,4 +101,10 @@ public class GDAX {
     priceMultimapBuilder.flushMultimap();
   }
 
+  public BigDecimal getSpread(Pair<Asset, Asset> tradingPair) {
+    BigDecimal pAsk = exchangeBook.getMostReasonable(tradingPair, AssetBook.OrderType.ASK).getLeft();
+    BigDecimal pBid = exchangeBook.getMostReasonable(tradingPair, AssetBook.OrderType.BID).getLeft();
+    return pAsk.subtract(pBid);
+  }
+
 }
