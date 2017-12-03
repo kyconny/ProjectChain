@@ -3,6 +3,7 @@ package ninja.kyle.projectchain;
 import com.google.common.collect.ImmutableMultimap;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,14 +27,14 @@ public class PriceMultimapBuilder {
     observerList.add(observer);
   }
 
-  public void addPairPrice(Pair<Asset, Asset> tradingPair, BigDecimal price) {
+  public void addPairPrice(Pair<Asset, Asset> tradingPair, BigDecimal price, ZonedDateTime time) {
     PriceHistoryBuilder builder = priceHistoryMap.get(tradingPair);
 
     if (builder == null) {
       throw new UnsupportedOperationException("Tried to add price to unsupported trading pair.");
     }
 
-    builder.addPrice(price);
+    builder.addPrice(price, time);
   }
 
   public void flushMultimap() {

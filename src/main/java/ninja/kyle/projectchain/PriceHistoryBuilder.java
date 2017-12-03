@@ -24,17 +24,14 @@ public class PriceHistoryBuilder {
     this.lastTime = lastTime;
   }
 
-  public void addPrice(BigDecimal price) {
-    ZonedDateTime time = ZonedDateTime.now();
+  public void addPrice(BigDecimal price, ZonedDateTime time) {
+    ZonedDateTime currentTime = ZonedDateTime.now();
 
     priceListLock.lock();
 
     ZonedDateTime lastTime = priceList.isEmpty() ? (this.lastTime == null ? time : this.lastTime) : priceList.getFirst().getTime();
 
-    //We note that the time delta is very unlikely to be ~2^28 seconds
-    //If it takes 8 years for a tick, then we have larger problems than
-    //The delta being incorrect.
-    priceList.addFirst(new PricePoint(price, time, Duration.between(lastTime, time)));
+    priceList.addFirst(new PricePoint(price, time, Duration.between(lastTime, time), Duration.between(time, currentTime)));
 
     priceListLock.unlock();
   }

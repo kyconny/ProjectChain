@@ -15,6 +15,7 @@ import com.neovisionaries.ws.client.WebSocketFactory;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.function.Consumer;
 
 import ninja.kyle.projectchain.Asset;
@@ -86,7 +87,7 @@ public class GDAX {
         BigDecimal price = new BigDecimal(priceStr);
         String timeString = messageObj.get("time").asString();
 
-        priceMultimapBuilder.addPairPrice(tradingPair, price);
+        priceMultimapBuilder.addPairPrice(tradingPair, price, ZonedDateTime.parse(timeString));
       }
     }
 
