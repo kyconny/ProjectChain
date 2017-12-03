@@ -1,27 +1,29 @@
 package ninja.kyle.projectchain;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 
 public class PricePoint {
   private final BigDecimal price;
-  private final int delta;
-  private final long time;
+  private final ZonedDateTime time;
+  private final Duration delta;
 
-  public PricePoint(BigDecimal price, int delta, long time) {
+  public PricePoint(BigDecimal price, ZonedDateTime time, Duration delta) {
     this.price = price;
-    this.delta = delta;
     this.time = time;
+    this.delta = delta;
   }
 
   public BigDecimal getPrice() {
     return price;
   }
 
-  public int getDelta() {
-    return delta;
+  public ZonedDateTime getTime() {
+    return time;
   }
 
-  public long getTime() {
-    return time;
+  public Duration getDelta() {
+    return delta;
   }
 }
