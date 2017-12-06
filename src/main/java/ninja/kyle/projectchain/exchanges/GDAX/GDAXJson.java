@@ -29,6 +29,7 @@ public class GDAXJson {
             <String, BiConsumer<JsonObject, GDAX.GDAXWSMessageHandler>>builder()
             .put("ticker", GDAXJson::handleTicker)
             .put("snapshot", GDAXJson::handleSnapshot)
+            .put("l2update", GDAXJson::handleL2Update)
             .build();
   }
 
@@ -89,6 +90,43 @@ public class GDAXJson {
     handler.handleL2Data(tradingPairFromProductID(object),
             getTradeInfoFromSnapshot(object, "bids"),
             getTradeInfoFromSnapshot(object, "asks"));
+  }
+
+  private static void handleL2Update(JsonObject object, GDAX.GDAXWSMessageHandler handler) {
+    Pair<Pair<BigDecimal, BigDecimal>[],  Pair<BigDecimal, BigDecimal>[]> arrays = getTradeInfoFromL2Update(object);
+    handler.handleL2Data(tradingPairFromProductID(object), arrays.getLeft(), arrays.getRight());
+  }
+
+  private static Pair<Pair<BigDecimal, BigDecimal>[], Pair<BigDecimal, BigDecimal>[]> getTradeInfoFromL2Update(JsonObject object) {
+    List<Pair<BigDecimal, BigDecimal>> bidList = new LinkedList<>();
+    List<Pair<BigDecimal, BigDecimal>> askList = new LinkedList<>();
+
+    for (JsonValue info : object.get("changes").asArray()) {
+      JsonArray array = info.asArray();
+      String type = array.get(0).asString();
+
+      String left;
+      String right;
+
+      switch (type) {
+        case "buy":
+          left = array.get(1).asString();
+          right = array.get(2).asString();
+          bidList.add(new Pair<>(new BigDecimal(left), new BigDecimal(right)));
+          break;
+        case "sell":
+          left = array.get(1).asString();
+          right = array.get(2).asString();
+          askList.add(new Pair<>(new BigDecimal(left), new BigDecimal(right)));
+          break;
+        default:
+          Logger.getLogger("GDAX").log(Level.WARNING, "GDAX Reported non buy/sell change in l2update");
+      }
+    }
+
+    Pair<BigDecimal, BigDecimal>[] bidArray = bidList.toArray((Pair<BigDecimal, BigDecimal>[])new Pair[bidList.size()]);
+    Pair<BigDecimal, BigDecimal>[] askArray = askList.toArray((Pair<BigDecimal, BigDecimal>[])new Pair[askList.size()]);
+    return new Pair<>(bidArray, askArray);
   }
 
   private static Pair<BigDecimal, BigDecimal>[] getTradeInfoFromSnapshot(JsonObject object, String side) {

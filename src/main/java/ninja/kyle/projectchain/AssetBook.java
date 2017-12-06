@@ -29,7 +29,7 @@ public class AssetBook {
   public void putNumberOfOrders(OrderType type, BigDecimal price, BigDecimal number) {
     ConcurrentNavigableMap<BigDecimal, BigDecimal> book = type.getBook.apply(this);
 
-    if (number.equals(0)) {
+    if (number.equals(BigDecimal.ZERO)) {
       book.remove(price);
       return;
     }
