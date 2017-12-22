@@ -20,7 +20,11 @@ public class PriceTickerMain {
 
   public static void main(String[] args) {
     GDAX gdax = GDAX.connectToGDAX();
-    gdax.addPriceObserver(onGDAXFlush);
+    gdax.addPriceHistoryObserver(onGDAXFlush);
+    gdax.addPriceObserver(new Pair<>(Asset.BTC, Asset.USD), bd -> System.out.println("lols " + bd));
+    BookObserver bp = new BookObserver(b -> System.out.println("lols"), gdax, new Pair<>(Asset.BTC, Asset.USD));
+
+    bp.startObserving();
 
     while (true) {
       try {
@@ -30,6 +34,7 @@ public class PriceTickerMain {
       }
       gdax.flushPriceData();
       System.out.println("Spread: " + gdax.getSpread(new Pair<>(Asset.BTC, Asset.USD)));
+      bp.stopObserving();
     }
   }
 

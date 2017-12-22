@@ -1,6 +1,5 @@
 package ninja.kyle.projectchain.exchanges.GDAX;
 
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 
 import com.neovisionaries.ws.client.WebSocket;
@@ -12,16 +11,13 @@ import com.neovisionaries.ws.client.WebSocketFactory;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.function.Consumer;
 
 import ninja.kyle.projectchain.Asset;
 import ninja.kyle.projectchain.AssetBook;
-import ninja.kyle.projectchain.ExchangeBook;
-import ninja.kyle.projectchain.PriceMultimapBuilder;
-import ninja.kyle.projectchain.PricePoint;
+import ninja.kyle.projectchain.exchanges.Exchange;
 import ninja.kyle.projectchain.internallib.Pair;
 
-public class GDAX {
+public class GDAX extends Exchange {
 
   private static GDAX instance;
 
@@ -29,11 +25,12 @@ public class GDAX {
   private final GDAXWSMessageHandler gdaxwsMessageHandler;
 
   private final WebSocket webSocket;
-  private final PriceMultimapBuilder priceMultimapBuilder;
-
-  private final ExchangeBook exchangeBook;
 
   private GDAX() throws IOException, WebSocketException {
+    super(ImmutableSet.<Pair<Asset,Asset>>builder()
+            .add(new Pair<>(Asset.BTC, Asset.USD))
+            .build());
+
     gdaxJson = new GDAXJson();
     gdaxwsMessageHandler = new GDAXWSMessageHandler();
 
@@ -44,16 +41,13 @@ public class GDAX {
             .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
             .connect();
 
-    ImmutableSet<Pair<Asset, Asset>> monitoredMarkets = ImmutableSet.<Pair<Asset,Asset>>builder()
-            .add(new Pair<>(Asset.BTC, Asset.USD))
-            .build();
-
-    priceMultimapBuilder = new PriceMultimapBuilder(monitoredMarkets);
-
-    exchangeBook = new ExchangeBook(monitoredMarkets, 20);
-
-    String subMsg = gdaxJson.genSubscribeMarketJSON(monitoredMarkets);
+    String subMsg = gdaxJson.genSubscribeMarketJSON(this.getTradingPairs());
     webSocket.sendText(subMsg);
+  }
+
+  @Override
+  public BigDecimal getAmmountOf(Asset asset) {
+    throw new UnsupportedOperationException("Unimplemented");
   }
 
   private class GDAXWSAdapter extends WebSocketAdapter {
@@ -66,16 +60,16 @@ public class GDAX {
 
   public class GDAXWSMessageHandler {
       public void handleTicker(Pair<Asset, Asset> tradingPair, BigDecimal price, ZonedDateTime time) {
-        priceMultimapBuilder.addPairPrice(tradingPair, price, time);
+        getPriceMultimapBuilder().addPairPrice(tradingPair, price, time);
       }
 
       public void handleL2Data(Pair<Asset, Asset> tradingPair, Pair<BigDecimal, BigDecimal>[] bids, Pair<BigDecimal, BigDecimal>[] asks) {
         for (Pair<BigDecimal, BigDecimal> b : bids) {
-          exchangeBook.putNumberOfOrders(tradingPair, AssetBook.OrderType.BID, b.getLeft(), b.getRight());
+          getExchangeBook().putNumberOfOrders(tradingPair, AssetBook.OrderType.BID, b.getLeft(), b.getRight());
         }
 
         for (Pair<BigDecimal, BigDecimal> a : asks) {
-          exchangeBook.putNumberOfOrders(tradingPair, AssetBook.OrderType.ASK, a.getLeft(), a.getRight());
+          getExchangeBook().putNumberOfOrders(tradingPair, AssetBook.OrderType.ASK, a.getLeft(), a.getRight());
         }
       }
   }
@@ -91,20 +85,6 @@ public class GDAX {
       }
     }
     return instance;
-  }
-
-  public void addPriceObserver(Consumer<ImmutableMultimap<Pair<Asset, Asset>, PricePoint>> observer) {
-    priceMultimapBuilder.addObserver(observer);
-  }
-
-  public void flushPriceData() {
-    priceMultimapBuilder.flushMultimap();
-  }
-
-  public BigDecimal getSpread(Pair<Asset, Asset> tradingPair) {
-    BigDecimal pAsk = exchangeBook.getMostReasonable(tradingPair, AssetBook.OrderType.ASK).getLeft();
-    BigDecimal pBid = exchangeBook.getMostReasonable(tradingPair, AssetBook.OrderType.BID).getLeft();
-    return pAsk.subtract(pBid);
   }
 
 }
