@@ -28,7 +28,7 @@ public class GDAX extends Exchange {
 
   private GDAX() throws IOException, WebSocketException {
     super(ImmutableSet.<Pair<Asset,Asset>>builder()
-            .add(new Pair<>(Asset.BTC, Asset.USD))
+            .add(new Pair<>(Asset.BTC, Asset.GBP))
             .build());
 
     gdaxJson = new GDAXJson();
