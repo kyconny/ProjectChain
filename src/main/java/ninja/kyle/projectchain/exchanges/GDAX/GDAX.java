@@ -15,6 +15,7 @@ import java.time.ZonedDateTime;
 import ninja.kyle.projectchain.Asset;
 import ninja.kyle.projectchain.AssetBook;
 import ninja.kyle.projectchain.exchanges.Exchange;
+import ninja.kyle.projectchain.exchanges.ExchangePriority;
 import ninja.kyle.projectchain.internallib.Pair;
 
 public class GDAX extends Exchange {
@@ -43,6 +44,11 @@ public class GDAX extends Exchange {
 
     String subMsg = gdaxJson.genSubscribeMarketJSON(this.getTradingPairs());
     webSocket.sendText(subMsg);
+  }
+
+  @Override
+  protected boolean shouldAllowQuery(ExchangePriority priority) {
+    throw new UnsupportedOperationException("Unimplemented");
   }
 
   private class GDAXWSAdapter extends WebSocketAdapter {

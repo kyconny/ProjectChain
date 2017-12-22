@@ -1,5 +1,5 @@
 package ninja.kyle.projectchain.exchanges;
 
-enum ExchangePriority {
+public enum ExchangePriority {
   LOW, MEDIUM, HIGH, URGENT
 }

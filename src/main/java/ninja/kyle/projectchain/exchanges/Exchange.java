@@ -3,6 +3,7 @@ package ninja.kyle.projectchain.exchanges;
 import com.google.common.collect.ImmutableMultimap;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -72,8 +73,14 @@ public abstract class Exchange {
     return pAsk.subtract(pBid);
   }
 
-  public ExchangeQuerier tryUnlockQuerier(ExchangePriority priority) {
-    return querier;
+  protected abstract boolean shouldAllowQuery(ExchangePriority priority);
+
+  public Optional<ExchangeQuerier> tryUnlockQuerier(ExchangePriority priority) {
+    if (shouldAllowQuery(priority)) {
+      return Optional.of(querier);
+    } else {
+      return Optional.empty();
+    }
   }
 
 }
