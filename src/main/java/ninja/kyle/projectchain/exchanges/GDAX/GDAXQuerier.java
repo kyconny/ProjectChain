@@ -8,7 +8,7 @@ import ninja.kyle.projectchain.AssetBook;
 import ninja.kyle.projectchain.exchanges.ExchangeQuerier;
 import ninja.kyle.projectchain.internallib.Pair;
 
-public class GDAXQuerier extends ExchangeQuerier {
+public class GDAXQuerier implements ExchangeQuerier {
   @Override
   public BigDecimal getAmmountOf(Asset asset) {
     throw new UnsupportedOperationException("Unimplemented");

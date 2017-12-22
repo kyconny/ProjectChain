@@ -49,7 +49,11 @@ public class BasicPurchaser {
     BigDecimal ourPrice = bestOffer.add(purchaseDelta);
 
     Optional<ExchangeQuerier> maybeQuerier = exchange.tryUnlockQuerier(ExchangePriority.HIGH, 2);
-    maybeQuerier.ifPresent(q -> q.tryCancelOrder(lastOrderID));
+
+    if (lastOrderID != null) {
+      maybeQuerier.ifPresent(q -> q.tryCancelOrder(lastOrderID));
+    }
+
     maybeQuerier.flatMap(q -> q.limitOrder(market, AssetBook.OrderType.BID, offerDelta, ourPrice)).ifPresent(s -> {
       lastOrderID = s;
       lastOrderPrice = ourPrice;
