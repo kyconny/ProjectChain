@@ -2,10 +2,8 @@ package ninja.kyle.projectchain;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
-import java.util.List;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import ninja.kyle.projectchain.internallib.Pair;
@@ -25,6 +23,13 @@ public class AssetBook {
   }
 
   public Pair<BigDecimal, BigDecimal> getMostReasonable(OrderType type) {
+
+    ConcurrentNavigableMap<BigDecimal, BigDecimal> book = type.getBook.apply(this);
+
+    if (book.size() == 0) {
+      throw new RuntimeException("Attempted to get most reasonable order of empty book");
+    }
+
     return new Pair<>(type.getBook.apply(this).firstEntry());
   }
 

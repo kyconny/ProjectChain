@@ -47,7 +47,7 @@ public class GDAX extends Exchange {
   }
 
   @Override
-  protected boolean shouldAllowQuery(ExchangePriority priority) {
+  protected boolean shouldAllowQuery(ExchangePriority priority, int queries) {
     throw new UnsupportedOperationException("Unimplemented");
   }
 
