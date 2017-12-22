@@ -73,11 +73,12 @@ public abstract class Exchange {
     return pAsk.subtract(pBid);
   }
 
-  protected abstract boolean shouldAllowQuery(ExchangePriority priority);
+  protected abstract boolean shouldAllowQuery(ExchangePriority priority, int queries);
 
-  public Optional<ExchangeQuerier> tryUnlockQuerier(ExchangePriority priority) {
-    if (shouldAllowQuery(priority)) {
-      return Optional.of(querier);
+  public Optional<ExchangeQuerier> tryUnlockQuerier(ExchangePriority priority, int queries) {
+    if (shouldAllowQuery(priority, queries)) {
+      ExchangeQuerier lockedQuerier = new LockedQuerier(querier, queries);
+      return Optional.of(lockedQuerier);
     } else {
       return Optional.empty();
     }

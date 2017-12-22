@@ -1,6 +1,7 @@
 package ninja.kyle.projectchain.exchanges.GDAX;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import ninja.kyle.projectchain.Asset;
 import ninja.kyle.projectchain.AssetBook;
@@ -14,7 +15,7 @@ public class GDAXQuerier extends ExchangeQuerier {
   }
 
   @Override
-  public String limitOrder(Pair<Asset, Asset> market, AssetBook.OrderType side, BigDecimal ammount, BigDecimal price) {
+  public Optional<String> limitOrder(Pair<Asset, Asset> market, AssetBook.OrderType side, BigDecimal ammount, BigDecimal price) {
     throw new UnsupportedOperationException("Unimplemented");
   }
 
