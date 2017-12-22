@@ -29,7 +29,7 @@ public class ExchangeMock extends Exchange {
   }
 
   @Override
-  protected boolean shouldAllowQuery(ExchangePriority priority, int queries) {
+  protected boolean shouldAllowQuery(QueryRecorder queryRecorder, ExchangePriority priority, int queries) {
     return shouldAllowQuery;
   }
 }
