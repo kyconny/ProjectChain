@@ -27,7 +27,7 @@ public class GDAX extends Exchange {
   private final WebSocket webSocket;
 
   private GDAX() throws IOException, WebSocketException {
-    super(ImmutableSet.<Pair<Asset,Asset>>builder()
+    super(new GDAXQuerier(), ImmutableSet.<Pair<Asset,Asset>>builder()
             .add(new Pair<>(Asset.BTC, Asset.GBP))
             .build());
 
@@ -43,11 +43,6 @@ public class GDAX extends Exchange {
 
     String subMsg = gdaxJson.genSubscribeMarketJSON(this.getTradingPairs());
     webSocket.sendText(subMsg);
-  }
-
-  @Override
-  public BigDecimal getAmmountOf(Asset asset) {
-    throw new UnsupportedOperationException("Unimplemented");
   }
 
   private class GDAXWSAdapter extends WebSocketAdapter {

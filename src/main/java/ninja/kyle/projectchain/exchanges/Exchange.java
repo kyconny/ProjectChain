@@ -15,12 +15,14 @@ import ninja.kyle.projectchain.internallib.Pair;
 
 public abstract class Exchange {
 
+  private final ExchangeQuerier querier;
   private final Set<Pair<Asset,Asset>> tradingPairs;
 
   private final ExchangeBook exchangeBook;
   private final PriceMultimapBuilder priceMultimapBuilder;
 
-  protected Exchange(Set<Pair<Asset, Asset>> tradingPairs) {
+  protected Exchange(ExchangeQuerier querier, Set<Pair<Asset, Asset>> tradingPairs) {
+    this.querier = querier;
     this.tradingPairs = tradingPairs;
 
     this.exchangeBook = new ExchangeBook(tradingPairs, 20);
@@ -70,6 +72,8 @@ public abstract class Exchange {
     return pAsk.subtract(pBid);
   }
 
-  public abstract BigDecimal getAmmountOf(Asset asset);
+  public ExchangeQuerier tryUnlockQuerier(ExchangePriority priority) {
+    return querier;
+  }
 
 }
