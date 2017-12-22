@@ -18,6 +18,8 @@ public class BasicPurchaser {
 
   private final BookObserver bookObserver;
 
+  private final QueryRecorder queryRecorder = new QueryRecorder();
+
   private BigDecimal lastOrderPrice = null;
   private String lastOrderID = null;
 
@@ -48,7 +50,7 @@ public class BasicPurchaser {
   private void beatBid(BigDecimal bestOffer) {
     BigDecimal ourPrice = bestOffer.add(purchaseDelta);
 
-    Optional<ExchangeQuerier> maybeQuerier = exchange.tryUnlockQuerier(ExchangePriority.HIGH, 2);
+    Optional<ExchangeQuerier> maybeQuerier = exchange.tryUnlockQuerier(queryRecorder, ExchangePriority.HIGH, 2);
 
     if (lastOrderID != null) {
       maybeQuerier.ifPresent(q -> q.tryCancelOrder(lastOrderID));

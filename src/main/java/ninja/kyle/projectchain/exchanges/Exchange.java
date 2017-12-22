@@ -12,6 +12,7 @@ import ninja.kyle.projectchain.AssetBook;
 import ninja.kyle.projectchain.ExchangeBook;
 import ninja.kyle.projectchain.PriceMultimapBuilder;
 import ninja.kyle.projectchain.PricePoint;
+import ninja.kyle.projectchain.QueryRecorder;
 import ninja.kyle.projectchain.internallib.Pair;
 
 public abstract class Exchange {
@@ -73,10 +74,10 @@ public abstract class Exchange {
     return pAsk.subtract(pBid);
   }
 
-  protected abstract boolean shouldAllowQuery(ExchangePriority priority, int queries);
+  protected abstract boolean shouldAllowQuery(QueryRecorder queryRecorder, ExchangePriority priority, int queries);
 
-  public Optional<ExchangeQuerier> tryUnlockQuerier(ExchangePriority priority, int queries) {
-    if (shouldAllowQuery(priority, queries)) {
+  public Optional<ExchangeQuerier> tryUnlockQuerier(QueryRecorder queryRecorder, ExchangePriority priority, int queries) {
+    if (shouldAllowQuery(queryRecorder, priority, queries)) {
       ExchangeQuerier lockedQuerier = new LockedQuerier(querier, queries);
       return Optional.of(lockedQuerier);
     } else {

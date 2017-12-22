@@ -14,6 +14,7 @@ import java.time.ZonedDateTime;
 
 import ninja.kyle.projectchain.Asset;
 import ninja.kyle.projectchain.AssetBook;
+import ninja.kyle.projectchain.QueryRecorder;
 import ninja.kyle.projectchain.exchanges.Exchange;
 import ninja.kyle.projectchain.exchanges.ExchangePriority;
 import ninja.kyle.projectchain.internallib.Pair;
@@ -47,7 +48,7 @@ public class GDAX extends Exchange {
   }
 
   @Override
-  protected boolean shouldAllowQuery(ExchangePriority priority, int queries) {
+  protected boolean shouldAllowQuery(QueryRecorder queryRecorder, ExchangePriority priority, int queries) {
     throw new UnsupportedOperationException("Unimplemented");
   }
 
